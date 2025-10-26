@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 simple_scanner.py
@@ -22,7 +23,7 @@ def ts() -> str:
 def log(msg: str):
     print(f"{ts()}  {msg}", flush=True)
 
-def validate_port(p: int) -> None:
+def validate_port(p: int):
     if not (1 <= p <= 65535):
         raise ValueError(f"Port {p} is out of valid range 1..65535")
 
@@ -39,7 +40,8 @@ def parse_args(argv):
     try:
         start = int(argv[2])
         end = int(argv[3]) if len(argv) > 3 else start
-        validate_port(start); validate_port(end)
+        validate_port(start)
+        validate_port(end)
         if end < start:
             raise ValueError("end_port must be >= start_port")
     except ValueError as ve:
@@ -47,7 +49,7 @@ def parse_args(argv):
         sys.exit(3)
 
     try:
-        delay_ms = int(argv[4]) if len(argv) > 4 else 50  # gentle default delay
+        delay_ms = int(argv[4]) if len(argv) > 4 else 50  # avoid fast/aggressive scans
         if delay_ms < 0:
             raise ValueError("delay_ms must be >= 0")
     except ValueError as ve:
@@ -68,7 +70,6 @@ def scan_port(sockaddr, timeout=0.5) -> bool:
 def main():
     host, start, end, delay_ms = parse_args(sys.argv)
 
-    # Resolve host (helps show “unreachable host” via socket.gaierror)
     try:
         addr = socket.gethostbyname(host)
     except socket.gaierror as e:
@@ -76,6 +77,7 @@ def main():
         sys.exit(5)
 
     log(f"Starting scan {host} ({addr}) ports {start}-{end} with delay {delay_ms}ms")
+    
     for port in range(start, end + 1):
         status = "OPEN" if scan_port((addr, port)) else "closed"
         log(f"{host}:{port} -> {status}")
